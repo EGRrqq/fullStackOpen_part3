@@ -1,4 +1,6 @@
 const express = require('express')
+const morgan = require('morgan')
+
 const app = express()
 
 let persons = [
@@ -24,10 +26,13 @@ let persons = [
     }
 ]
 
-app.use(express.json())
+morgan.token('req-body', req => JSON.stringify(req.body))
 
-app.get('/info', (request, response) => {
-    response.send(`
+app.use(express.json())
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :req-body'))
+
+app.get('/info', (req, res) => {
+    res.send(`
         <p>Phonebook has info for ${persons.length} persons</p> 
         <p>${new Date()}</p>
     `)
@@ -35,18 +40,18 @@ app.get('/info', (request, response) => {
 
 const generateId = () => Math.floor(Math.random() * 999999999)
 
-app.post('/api/persons', (request, response) => {
-    const body = request.body
+app.post('/api/persons', (req, res) => {
+    const body = req.body
 
     if (!body.name || !body.number) {
         const missingType = !body.name ? 'Name' : 'Number'
-        return response.status(400).json({
+        return res.status(400).json({
             error: `${missingType} is missing`
         })
     }
 
     if (persons.find((person) => person.name === body.name)) {
-        return response.status(400).json({
+        return res.status(400).json({
             error: 'name must be unique'
         })
     }
@@ -60,28 +65,28 @@ app.post('/api/persons', (request, response) => {
 
     persons = persons.concat(person)
 
-    response.json(person)
+    res.json(person)
 })
 
-app.get('/api/persons', (request, response) => {
-    response.json(persons)
+app.get('/api/persons', (req, res) => {
+    res.json(persons)
 })
 
-app.delete('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
+app.delete('/api/persons/:id', (req, res) => {
+    const id = Number(req.params.id)
     persons = persons.filter(person => person.id !== id)
 
-    response.status(204).end()
+    res.status(204).end()
 })
 
-app.get('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
+app.get('/api/persons/:id', (req, res) => {
+    const id = Number(req.params.id)
     const person = persons.find(person => person.id === id)
 
     if (person) {
-        response.json(person)
+        res.json(person)
     } else {
-        response.status(404).end()
+        res.status(404).end()
     }
 })
 
