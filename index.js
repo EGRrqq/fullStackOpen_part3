@@ -48,7 +48,7 @@ app.post('/api/persons', (req, res, next) => {
     const { name, number } = req.body
 
     if (!name || !number) {
-        const missing = !!name ? 'Number' : 'Name'
+        const missing = !name ? 'Name' : 'Number'
         return res.status(400).json({ error: `'${missing}' is missing` })
     }
 
@@ -76,7 +76,7 @@ app.put('/api/persons/:id', (req, res, next) => {
     const { name, number } = req.body
 
     if (!name || !number) {
-        const missing = !!name ? 'Number' : 'Name'
+        const missing = !name ? 'Name' : 'Number'
         return res.status(400).json({ error: `'${missing}' is missing` })
     }
 
